@@ -60,7 +60,7 @@ void CUDAErrorCheck()
 
 int main(int argc,char* argv[])
 {
-	int niter = 100489;
+	int niter = 230400;
 	float *randomnums;
 	double pi;
 	cudaMalloc((void**)&randomnums, (2*niter)*sizeof(float));
@@ -77,8 +77,8 @@ int main(int argc,char* argv[])
 		exit(EXIT_FAILURE);
 	}
 
-	int threads = 317;
-	int blocks = 317;
+	int threads = 512;
+	int blocks = 450;
 	int* count_d;
 	int *count = (int*)malloc(blocks*threads*sizeof(int));
 	unsigned int reducedcount = 0;
@@ -95,7 +95,7 @@ int main(int argc,char* argv[])
 	cudaMemcpy(count, count_d, blocks*sizeof(int), cudaMemcpyDeviceToHost);
 	int i = 0;
 	//reduce array into int
-	for(i = 0; i<=blocks; i++)
+	for(i = 0; i<blocks; i++)
 	{
 		reducedcount += count[i];
 		printf("count[%d]:\t%d\n", i, count[i]);
