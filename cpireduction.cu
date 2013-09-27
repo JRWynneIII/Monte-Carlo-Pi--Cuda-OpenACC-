@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <iostream>
 #include <stdlib.h>
 #include <cuda.h>
 #include <curand.h>
@@ -29,17 +30,22 @@ __global__ void reduction(int* count_d)
 {
 	extern __shared__ int sdata[];
 	int tid = threadIdx.x;
-	__shared__ int blockTotal;
-	blockTotal = 0;
 	int i=blockIdx.x*blockDim.x+threadIdx.x;
+	sdata[tid] = count_d[i];
 	__syncthreads();
-	for (int s = 0; s<16; s++)
-		atomicAdd(&sdata[tid], count_d[(i*16)+s]);
-		//sdata[tid] += count_d[i+i+s];
+	//reduce all in sdata[] to one int at sdata[0]
+	for (int a = blockDim.x/2; a>0 ;a>>=1)
+	{
+		if (tid<a)
+		{
+			sdata[tid] += sdata[tid+a];
+		}
 	__syncthreads();
-	atomicAdd(&blockTotal, sdata[tid]);
-	//blockTotal += sdata[tid];
-	count_d[blockIdx.x] = blockTotal;
+	}
+	if (tid == 0)
+	{
+		count_d[blockIdx.x] = sdata[0];
+	}
 }
 
 void CUDAErrorCheck()
@@ -54,7 +60,7 @@ void CUDAErrorCheck()
 
 int main(int argc,char* argv[])
 {
-	int niter = 100000;
+	int niter = 100489;
 	float *randomnums;
 	double pi;
 	cudaMalloc((void**)&randomnums, (2*niter)*sizeof(float));
@@ -71,8 +77,8 @@ int main(int argc,char* argv[])
 		exit(EXIT_FAILURE);
 	}
 
-	int threads = 1000;
-	int blocks = 100;
+	int threads = 317;
+	int blocks = 317;
 	int* count_d;
 	int *count = (int*)malloc(blocks*threads*sizeof(int));
 	unsigned int reducedcount = 0;
@@ -82,14 +88,14 @@ int main(int argc,char* argv[])
 
 	kernel <<<blocks, threads>>> (count_d, randomnums);
 	cudaDeviceSynchronize();
-	reduction <<<50, 125, 125*sizeof(int)>>> (count_d);
+	reduction <<<blocks, threads, threads*sizeof(int)>>> (count_d);
 	cudaDeviceSynchronize();
 	CUDAErrorCheck();
 
-	cudaMemcpy(count, count_d, 100*sizeof(int), cudaMemcpyDeviceToHost);
+	cudaMemcpy(count, count_d, blocks*sizeof(int), cudaMemcpyDeviceToHost);
 	int i = 0;
 	//reduce array into int
-	for(i = 0; i<50; i++)
+	for(i = 0; i<=blocks; i++)
 	{
 		reducedcount += count[i];
 		printf("count[%d]:\t%d\n", i, count[i]);
