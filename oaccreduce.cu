@@ -4,7 +4,6 @@
 #include <cuda.h>
 #include <curand.h>
 #include <time.h>
-#include "reduce.h"
 
 __global__ void kernel(int* count_d, float* randomnums)
 {
@@ -25,28 +24,6 @@ __global__ void kernel(int* count_d, float* randomnums)
 		count_d[tid] = 1;
 	else
 		count_d[tid] = 0;	
-}
-
-__global__ void reduction(int* count_d)
-{
-	extern __shared__ int sdata[];
-	int tid = threadIdx.x;
-	int i=blockIdx.x*blockDim.x+threadIdx.x;
-	sdata[tid] = count_d[i];
-	__syncthreads();
-	//reduce all in sdata[] to one int at sdata[0]
-	for (int a = blockDim.x/2; a>0 ;a>>=1)
-	{
-		if (tid<a)
-		{
-			sdata[tid] += sdata[tid+a];
-		}
-	__syncthreads();
-	}
-	if (tid == 0)
-	{
-		count_d[blockIdx.x] = sdata[0];
-	}
 }
 
 void CUDAErrorCheck()
@@ -91,7 +68,6 @@ extern "C" int* launch(int threads, int blocks)
 
 
 	cudaFree(randomnums);
-	cudaFree(count_d);
 	free(count);
 
 	return count_d;
