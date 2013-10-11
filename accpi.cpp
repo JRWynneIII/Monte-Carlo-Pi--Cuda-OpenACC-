@@ -27,13 +27,15 @@ int main(int argc, char* argv[])
 			z = ((x*x)+(y*y));
 			output[i] = z;
 		}
-	}
-	for (i = 0; i<niter; i++)
-	{
-		if (output[i]<=1)
+		for (i = 0; i<100000; i++)
 		{
-			++count;
-		}	
+			if (output[i]<=1)
+			{
+				++count;
+			}	
+			else
+				continue;
+		}
 	}
 	pi = ((double)count/(double)niter)*4.0;		
 	printf("Pi: %f\n", pi);			
