@@ -1,0 +1,2 @@
+all:
+	CC -acc -Minfo=all -ta=nvidia:5.0,cc3x accpi.cpp -o /tmp/work/wyn/a.out
