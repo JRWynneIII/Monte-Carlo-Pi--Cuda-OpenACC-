@@ -1,6 +1,5 @@
-GPU Monte Carlo (Pi)
-====================
-
+Accelerating Serial Code for GPUs
+=====================================
 This tutorial covers how to accelerate a simple Monte Carlo operation using CUDA, OpenACC, and finally using the Thrust template library.
 
 Before these examples can be compiled, you need to make sure that the PGI programming environment and the CUDA tool kit is loaded.
@@ -9,14 +8,14 @@ Before these examples can be compiled, you need to make sure that the PGI progra
 module load PrgEnv-pgi
 module load cudatoolkit
 ```
-Before you can submit any of these examples, you need to edit the submit script (`titan.pbs`) and change to teh appropriate project ID.
+Before you can submit any of these examples, you need to edit the submit script (titan.pbs) and change <PROJID> to teh appropriate project ID.
 
 To compile and submit:
+* For the serial version: `make serial`
+* For the CUDA version: `make cuda`
+* For the OpenACC version: `make openacc`
+* For the Thrust version: `make thrust`
 
-For the serial version: `make serial`
-For the CUDA version: `make cuda`
-For the OpenACC version: `make openacc`
-For the Thrust version: `make thrust`
 The output should look something like:
 
 ```

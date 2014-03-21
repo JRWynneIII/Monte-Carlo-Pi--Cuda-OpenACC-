@@ -1,3 +1,19 @@
-all:
-	nvcc -G -g -arch=sm_30 -lcurand -c oaccreduce.cu -o cuda.o
-	CC -g -Minfo=all -ta=nvidia:5.0,cc3x -lcurand -acc accreduce.cpp cuda.o -o /tmp/work/wyn/a.out
+serial:
+	cc serialpi.c -o /tmp/work/$(USER)/pi.out
+	cd /tmp/work/$(USER)
+	qsub titan.pbs
+
+cuda:
+	nvcc -arch=sm_35 -lcurand cpi.cu -o /tmp/work/$(USER)/pi.out
+	cd /tmp/work/$(USER)
+	qsub titan.pbs
+
+openacc:
+	CC -acc -Minfo=all -ta=nvidia:5.0,cc3x accpi.cpp -o /tmp/work/$(USER)/pi.out
+	cd /tmp/work/$(USER)
+	qsub titan.pbs
+
+thrust:
+	nvcc -arch=sm_35 thrust.cu -o /tmp/work/$(USER)/pi.out
+	cd /tmp/work/$(USER)
+	qsub titan.pbs
